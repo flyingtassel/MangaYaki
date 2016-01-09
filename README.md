@@ -1,6 +1,6 @@
 # MangaYaki（鳗鱼烧/漫娱烧）
 -------------------------------------------------------
-* A script for manga online view sites, including ad block & pre-loading, etc.  
+* A script for manga online view sites.  
 * Based on MoreManga (by Chowmein@userscript).
 * Working with TamperMonkey or GreasyMonkey.		
 
@@ -31,8 +31,6 @@
 #####功能说明简体化
 
 * -----v0.8.0.20160108
-
 #####正式立项
-
 #####建立github项目
 
