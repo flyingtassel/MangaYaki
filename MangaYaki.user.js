@@ -2,7 +2,10 @@
 // @name           MangaYaki
 // @namespace      MangaYaki_Flyingtassel
 // @description    MangaYaki
-// @updateURL      https://userscripts.org/scripts/source/135690.meta.js
+// @updateURL      https://rawgit.com/flyingtassel/MangaYaki/MangaYaki/MangaYaki.user.js
+// @include        http://g.e-hentai.org/s*
+// @include        /^http://www\.(2|6|8)comic\.com/[\w]+/
+// @include        http://*comicvip.com/*
 // @include        http://*dm5.com/m*
 // @include        http://*1kkk.com/ch*
 // @include        http://*1kkk.com/vol*
@@ -24,7 +27,7 @@
 // @grant          GM_deleteValue
 // @grant          GM_xmlhttpRequest
 // @version        v0.8.1.20160109
-// @author				 Original by Chowmein@userscripts.org,extend by Flyingtassl@S1.
+// @author				 Chowmein@userscripts.org,extended by Flyingtassl@S1.
 // ==/UserScript==
 
 // notyet:( @include        http://*dmzj.com/view/*
@@ -2444,7 +2447,7 @@
 						myApp.$PageNumberSelect.blur();
 						myApp.$mmInfoPanel.css("top", -myApp.$mmInfoPanel.height());
 						myApp.$ControlPanel.css("bottom", -myApp.$ControlPanel.height());
-					}, 3000);
+					}, 2000);
 				})
 				.bind('click', function(event) {
 					if (event.target === this) {
@@ -2522,7 +2525,7 @@
 						myApp.$PageNumberSelect.blur();
 						myApp.$mmInfoPanel.css("top", -myApp.$mmInfoPanel.height());
 						myApp.$ControlPanel.css("bottom", -myApp.$ControlPanel.height());
-					}, 3000);
+					}, 2000);
 				})
 				.bind('click', function(event) {
 					if (event.target === this) {
@@ -4180,5 +4183,99 @@
 			newApp.init();
 		}
 	}
+	///////////////////////////////////////////////////////////////////////////////
+	//http://g.e-hentai.org/
+	else if (/^http:\/\/g.e-hentai.org\//.test(gBaseUrl)) {
+		if (true) {
+			var $newImg = $("#img");
+			var allpg = $(".sn")[0].children[2].children[1].innerHTML;
 
+
+			var pID = function(c, k) {
+				var m = $(".sn")[0].children[c].attributes[k].nodeValue.substring(34, 24);
+				return m;
+			};
+			var pNumber = function(c, k) {
+				var n = $(".sn")[0].children[c].attributes[k].nodeValue.indexOf("-", 12);
+				var m = $(".sn")[0].children[c].attributes[k].nodeValue.substring(n + 1);
+				return m;
+			};
+
+			var page = window.location.href;
+			var prev = base_url + "s/" + pID(1, 2) + "/" + gid + "-" + pNumber(1, 2);
+			var next = base_url + "s/" + pID(3, 2) + "/" + gid + "-" + pNumber(3, 2);
+
+
+			var request = new XMLHttpRequest(); // 新建XMLHttpRequest对象
+
+			request.onreadystatechange = function() { // 状态发生变化时，函数被回调
+				if (request.readyState === 4) { // 成功完成
+					// 判断响应结果:
+					if (request.status === 200) {
+						// 成功，通过responseText拿到响应的文本:
+						var regImgUrl =
+							/<img\sid=\"img\"\ssrc=\"([a-zA-Z0-9:\/\.\:\-\=]+\.jpg)/
+						alert(regImgUrl.exec(request.responseText)[1]);
+					} else {
+						// 失败，根据响应码判断失败原因:
+						alert(request.responseText);
+					}
+				} else {
+					// HTTP请求还在继续...
+				}
+			}
+
+			// 发送请求:
+			request.open('GET', 'http://g.e-hentai.org/s/cded9a415c/892556-9');
+			request.send();
+
+			//alert('请求已发送，请等待响应...');
+
+
+
+			// alert($newImg[0].attributes[1].nodeValue);
+
+			DataSourceA.prototype.init = function() {
+				this.name = "e-hentai";
+				this.dataTable = new Array(allpg);
+				this.size = allpg;
+
+				this.hasNextVolume = false;
+
+				this.linkCount = 2;
+				this.isUseMT = false;
+
+
+
+				this._getUrl = function() {
+					return prev;
+				};
+
+				this._parse = function(responseText, page) {
+					eval(responseText);
+					var len = 2;
+					for (var i = 0, p = page - 1; i < len; ++i, ++p) {
+						this.dataTable[p] = {
+							src: d[i]
+						};
+					}
+				};
+
+				this.getNextVolume = function() {
+					return null;
+				};
+			};
+
+			var newApp = new MyApp({
+				$ImageBox: $newImg,
+				currentPageIndex: 1,
+				historyUrl: function() {
+					return gBaseUrl;
+				},
+				itemsDataSource: new DataSourceA
+			});
+
+			newApp.init();
+		}
+	}
 })(window, jQuery);
