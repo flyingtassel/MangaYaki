@@ -4184,98 +4184,97 @@
 		}
 	}
 	///////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////
 	//http://g.e-hentai.org/
 	else if (/^http:\/\/g.e-hentai.org\//.test(gBaseUrl)) {
-		if (true) {
-			var $newImg = $("#img");
-			var allpg = $(".sn")[0].children[2].children[1].innerHTML;
+		var $oldImg = $("#img");
 
+		if ($oldImg.length) {
+			var currP = $(".sn")[0].children[2].children[0].innerHTML;
+			var allP = $(".sn")[0].children[2].children[1].innerHTML;
+			document.oncontextmenu = function() {};
 
-			var pID = function(c, k) {
-				var m = $(".sn")[0].children[c].attributes[k].nodeValue.substring(34, 24);
-				return m;
-			};
-			var pNumber = function(c, k) {
-				var n = $(".sn")[0].children[c].attributes[k].nodeValue.indexOf("-", 12);
-				var m = $(".sn")[0].children[c].attributes[k].nodeValue.substring(n + 1);
-				return m;
-			};
+			var $newImg = $("<img id='mmImage' />").insertAfter($oldImg);
+			$oldImg.remove();
 
-			var page = window.location.href;
-			var prev = base_url + "s/" + pID(1, 2) + "/" + gid + "-" + pNumber(1, 2);
-			var next = base_url + "s/" + pID(3, 2) + "/" + gid + "-" + pNumber(3, 2);
-
-
-			var request = new XMLHttpRequest(); // 新建XMLHttpRequest对象
-
-			request.onreadystatechange = function() { // 状态发生变化时，函数被回调
-				if (request.readyState === 4) { // 成功完成
-					// 判断响应结果:
-					if (request.status === 200) {
-						// 成功，通过responseText拿到响应的文本:
-						var regImgUrl =
-							/<img\sid=\"img\"\ssrc=\"([a-zA-Z0-9:\/\.\:\-\=]+\.jpg)/
-						alert(regImgUrl.exec(request.responseText)[1]);
-					} else {
-						// 失败，根据响应码判断失败原因:
-						alert(request.responseText);
-					}
-				} else {
-					// HTTP请求还在继续...
-				}
-			}
-
-			// 发送请求:
-			request.open('GET', 'http://g.e-hentai.org/s/cded9a415c/892556-9');
-			request.send();
-
-			//alert('请求已发送，请等待响应...');
-
-
-
-			// alert($newImg[0].attributes[1].nodeValue);
-
-			DataSourceA.prototype.init = function() {
+			DataSource.prototype.init = function() {
 				this.name = "e-hentai";
-				this.dataTable = new Array(allpg);
-				this.size = allpg;
+				this.dataTable = [];
 
+				this.hasPrevVolume = false;
 				this.hasNextVolume = false;
 
-				this.linkCount = 2;
-				this.isUseMT = false;
+				var currPageURL = window.location.href;
+				var prevPageURL = $("#prev")[0].attributes[2].nodeValue;
+				var nextPageURL = $("#next")[0].attributes[2].nodeValue;
 
+				var getImageURL = function(PageURL) {
+					var request = new XMLHttpRequest(); // 新建XMLHttpRequest对象
+					request.onreadystatechange = function() { // 状态发生变化时，函数被回调
+							if (request.readyState === 4) { // 成功完成
+								// 判断响应结果:
+								if (request.status === 200) {
+									// 成功，通过responseText拿到响应的文本:
+									var regImgUrl =
+										/<img\sid=\"img\"\ssrc=\"([a-zA-Z0-9\/\.\:\-\_\=\s]+\.jpg)/;
+									var regNextPage =
+										/id=\"next\"[\w\(\)\'\s\=\_\"\,]+href=\"([a-zA-Z0-9\/\.\:\-]+)\"/;
+									var regPrevPage =
+										/id=\"prev\"[\w\(\)\'\s\=\_\"\,]+href=\"([a-zA-Z0-9\/\.\:\-]+)\"/;
+									return regNextPage.exec(request.responseText)[1];
+								} else {
+									// 失败，根据响应码判断失败原因:
+									alert(request.responseText);
+								}
+							} else {
+								// HTTP请求还在继续...
+							}
+						}
+						// 发送请求:
+					request.open('GET', PageURL);
+					request.send();
+				}
 
+				var testurl = getImageURL(prevPageURL);
+				alert(testurl);
+				// for (var p = 1; p <= allP; ++p) {
+				// 	this.dataTable[allP - 1] = getImageURL(currP);
+				//
+				// 	this.dataTable[p - 1] = {
+				// 		src:1
+				// 	};
+				//
+				// }
 
-				this._getUrl = function() {
-					return prev;
-				};
+				this.size = this.dataTable.length;
 
-				this._parse = function(responseText, page) {
-					eval(responseText);
-					var len = 2;
-					for (var i = 0, p = page - 1; i < len; ++i, ++p) {
-						this.dataTable[p] = {
-							src: d[i]
-						};
-					}
-				};
+				this.getPrevVolume = function() {
+						// if (ci > 0) {
+						// 	return _unsafeWindow.replaceurl("ch", pi);
+						// }
+						return null;
+					},
 
-				this.getNextVolume = function() {
-					return null;
-				};
+					this.getNextVolume = function() {
+						// if (ci < _unsafeWindow.cs.length / f - 1) {
+						// 	return _unsafeWindow.replaceurl("ch", ni);
+						// }
+						return null;
+					};
 			};
 
+			//
 			var newApp = new MyApp({
 				$ImageBox: $newImg,
-				currentPageIndex: 1,
+				currentPageIndex: currP,
 				historyUrl: function() {
-					return gBaseUrl;
+					return currPageURL;
 				},
-				itemsDataSource: new DataSourceA
+				itemsDataSource: new DataSource
 			});
 
 			newApp.init();
 		}
 	}
+
 })(window, jQuery);
